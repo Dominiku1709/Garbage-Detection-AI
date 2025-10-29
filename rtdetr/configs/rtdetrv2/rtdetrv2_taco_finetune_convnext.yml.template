@@ -1,0 +1,58 @@
+__include__:
+  - ../../rtdetr/configs/dataset/coco_detection.yml
+  - ../../rtdetr/configs/runtime.yml
+  - ../../rtdetr/configs/rtdetrv2/include/dataloader.yml
+  - ../../rtdetr/configs/rtdetrv2/include/rtdetrv2_r50vd.yml
+
+output_dir: {OUTPUT_DIR}
+
+RTDETR:
+  backbone: HGNetv2
+
+HGNetv2:
+  name: 'L'
+  return_idx: [1, 2, 3]
+  freeze_at: 0
+  freeze_norm: True
+  pretrained: True
+
+task: detection
+remap_mscoco_category: false
+tuning: '{TUNING_CHECKPOINT}'
+compile: true
+epoches: 50
+
+num_classes: 60
+
+train_dataloader:
+  num_workers: 4
+  dataset:
+    type: CocoDetection
+    img_folder: {TRAIN_IMG_FOLDER}
+    ann_file: {TRAIN_ANN_FILE}
+
+val_dataloader:
+  num_workers: 4
+  dataset:
+    type: CocoDetection
+    img_folder: {VAL_IMG_FOLDER}
+    ann_file: {VAL_ANN_FILE}
+    
+batch_size: 16
+
+optimizer:
+  type: AdamW
+  params:
+    - params: '^(?=.*backbone)'
+      lr: 0.00001
+  lr: 0.0001
+  weight_decay: 0.0001
+  betas: [0.9, 0.999]
+
+lr_scheduler:
+  type: OneCycleLR
+  max_lr: 0.0001
+  pct_start: 0.3
+  total_steps: 4000
+
+checkpoint_freq: 10
