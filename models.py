@@ -13,7 +13,7 @@ import cv2
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
 MODEL_PATHS = {
-    "Rtdetrv2": os.path.join(PROJECT_ROOT, "FINAL/FINETUNE_BASELINE/rtdetrv2_finetune_taco_BASELINE/best.pth"),
+    "Rtdetrv2": os.path.join(PROJECT_ROOT, "FINAL/FINETUNE_BASELINE/rtdetrv2_finetune_taco_finetune_BASELINE/best.pth"),
     "Distill-Convnet": os.path.join(PROJECT_ROOT, "FINAL/DISTILL-CONVNEXT/distilled_rtdetr_convnext_teacher_BEST.pth"),
     "Distill-Vit": os.path.join(PROJECT_ROOT, "FINAL/FINETUNE_DISTILLED/rtdetrv2_finetune_taco_vit_teacher/best.pth"),
     "YOLOv11l": os.path.join(PROJECT_ROOT, "FINAL/YOLO/yolo_checkpoints/yolo11l_finetune_baseline/weights/best.pt")

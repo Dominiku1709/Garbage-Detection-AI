@@ -113,7 +113,7 @@ def main():
 
     st.sidebar.header("⚙️ Settings")
     model_name = st.sidebar.selectbox("Select model", ["YOLOv11l", "Rtdetrv2", "Distill-Convnet", "Distill-Vit"])
-    confidence_threshold = st.sidebar.slider("Confidence Threshold", 0.0, 1.0, 0.3, 0.05)
+    confidence_threshold = st.sidebar.slider("Confidence Threshold", 0.0, 1.0, 0.1, 0.05)
     
     with st.spinner(f"Loading {model_name}..."):
         model = load_model(model_name)
