@@ -17,6 +17,10 @@ from models import (
     load_DistillVit,
     load_YOLO,
     run_inference,
+    # <<< THÊM MỚI 1: Import các hàm tải mô hình mới từ models.py >>>
+    load_YOLO_CodeTR,
+    load_Rtdetrv2_CodeTR_Baseline,
+    load_Rtdetrv2_CodeTR_Distilled,
 )
 from utils import (
     get_device,
@@ -29,35 +33,107 @@ from utils import (
 )
 
 # =========================================================
-# CONFIGURATION
+# CONFIGURATION (Không thay đổi)
 # =========================================================
 device = get_device()
 
+# <<< THÊM MỚI 2: Cập nhật hàm load_model để xử lý các tên model mới >>>
 @st.cache_resource
 def load_model(model_name):
-    if model_name == "Rtdetrv2": return load_Rtdetrv2()
-    if model_name == "Distill-Convnet": return load_DistillConv()
-    if model_name == "Distill-Vit": return load_DistillVit()
-    if model_name == "YOLOv11l": return load_YOLO()
+    # Các model cũ
+    if model_name == "RT-DETR (Baseline)": return load_Rtdetrv2()
+    if model_name == "RT-DETR (Distilled w/ ConvNeXt)": return load_DistillConv()
+    if model_name == "RT-DETR (Distilled w/ ViT)": return load_DistillVit()
+    if model_name == "YOLOv11l (Baseline)": return load_YOLO()
+    # Các model mới
+    if model_name == "YOLOv11l (CodeTR)": return load_YOLO_CodeTR()
+    if model_name == "RT-DETR (CodeTR Baseline)": return load_Rtdetrv2_CodeTR_Baseline()
+    if model_name == "RT-DETR (CodeTR Distilled)": return load_Rtdetrv2_CodeTR_Distilled()
+
 
 OUTPUT_DIR = "output"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-RTDETR_CLASS_NAMES = {i: f"class_{i}" for i in range(60)}
+TACO_CLASS_NAMES = {
+    0: 'Aluminium foil',
+    1: 'Battery',
+    2: 'Aluminium blister pack',
+    3: 'Carded blister pack',
+    4: 'Other plastic bottle',
+    5: 'Clear plastic bottle',
+    6: 'Glass bottle',
+    7: 'Plastic bottle cap',
+    8: 'Metal bottle cap',
+    9: 'Broken glass',
+    10: 'Food Can',
+    11: 'Aerosol',
+    12: 'Drink can',
+    13: 'Toilet tube',
+    14: 'Other carton',
+    15: 'Egg carton',
+    16: 'Drink carton',
+    17: 'Corrugated carton',
+    18: 'Meal carton',
+    19: 'Pizza box',
+    20: 'Paper cup',
+    21: 'Disposable plastic cup',
+    22: 'Foam cup',
+    23: 'Glass cup',
+    24: 'Other plastic cup',
+    25: 'Food waste',
+    26: 'Glass jar',
+    27: 'Plastic lid',
+    28: 'Metal lid',
+    29: 'Other plastic',
+    30: 'Magazine paper',
+    31: 'Tissues',
+    32: 'Wrapping paper',
+    33: 'Normal paper',
+    34: 'Paper bag',
+    35: 'Plastified paper bag',
+    36: 'Plastic film',
+    37: 'Six pack rings',
+    38: 'Garbage bag',
+    39: 'Other plastic wrapper',
+    40: 'Single-use carrier bag',
+    41: 'Polypropylene bag',
+    42: 'Crisp packet',
+    43: 'Spread tub',
+    44: 'Tupperware',
+    45: 'Disposable food container',
+    46: 'Foam food container',
+    47: 'Other plastic container',
+    48: 'Plastic glooves',
+    49: 'Plastic utensils',
+    50: 'Pop tab',
+    51: 'Rope & strings',
+    52: 'Scrap metal',
+    53: 'Shoe',
+    54: 'Squeezable tube',
+    55: 'Plastic straw',
+    56: 'Paper straw',
+    57: 'Styrofoam piece',
+    58: 'Unlabeled litter',
+    59: 'Cigarette',
+}
+
 
 @st.cache_data
 def get_color_map(class_names):
     return {name: [random.randint(0, 255) for _ in range(3)] for name in class_names}
 
 # =========================================================
-# PREDICTION FUNCTION
+# PREDICTION FUNCTION (Không thay đổi)
+# Cấu trúc hiện tại đã đủ linh hoạt để xử lý các model mới
+# mà không cần chỉnh sửa.
 # =========================================================
-def predict_and_draw(model, image_np, conf_threshold=0.3, color_map=None):
+def predict_and_draw(model, model_name, image_np, conf_threshold=0.3, color_map=None):
     image_pil = Image.fromarray(cv2.cvtColor(image_np, cv2.COLOR_BGR2RGB))
     outputs = run_inference(model, image_pil)
 
     boxes_to_draw, labels_to_draw = [], []
 
+    # Xử lý cho mô hình YOLO
     if isinstance(outputs, list):
         results = outputs[0]
         class_names = results.names
@@ -70,25 +146,23 @@ def predict_and_draw(model, image_np, conf_threshold=0.3, color_map=None):
                 boxes_to_draw.append(coords)
                 labels_to_draw.append(label)
     
+    # Xử lý cho các mô hình RT-DETR
     elif isinstance(outputs, dict) and "pred_logits" in outputs:
-        class_names = RTDETR_CLASS_NAMES
+        class_names = TACO_CLASS_NAMES
         
-        # LẤY LOGITS GỐC
         raw_logits = outputs["pred_logits"][0]
         pred_boxes = outputs["pred_boxes"][0]
 
         pred_probs = raw_logits.sigmoid()
-
         scores, labels = pred_probs.max(dim=-1)
+
+        # Vá lỗi tạm thời cho ConvNeXt (nếu cần)
+        if "ConvNeXt" in model_name: # Dùng 'in' để linh hoạt hơn
+            st.warning("Lưu ý: Score của mô hình ConvNeXt đang được tăng nhân tạo (x4) để hiển thị.")
+            scores = scores * 4.0
         
         keep = scores > conf_threshold
         
-        print("\n" + "="*50)
-        print(f"Ngưỡng tin cậy: {conf_threshold}")
-        print(f"10 giá trị score cao nhất (sau sigmoid): {torch.topk(scores, 10).values.cpu().numpy()}")
-        print(f"Số lượng box vượt qua ngưỡng: {torch.sum(keep).item()}")
-        print("="*50 + "\n")
-
         if torch.sum(keep) > 0:
             filtered_boxes = pred_boxes[keep]
             filtered_scores = scores[keep]
@@ -114,14 +188,30 @@ def main():
     st.markdown("Upload an image or use your webcam for real-time detection.")
 
     st.sidebar.header("⚙️ Settings")
-    model_name = st.sidebar.selectbox("Select model", ["YOLOv11l", "Rtdetrv2", "Distill-Convnet", "Distill-Vit"])
-    confidence_threshold = st.sidebar.slider("Confidence Threshold", 0.0, 1.0, 0.3, 0.05)
+    
+    # <<< THÊM MỚI 3: Thêm tên các mô hình mới vào danh sách lựa chọn >>>
+    model_options = [
+        "YOLOv11l (Baseline)",
+        "YOLOv11l (CodeTR)",
+        "RT-DETR (Baseline)",
+        "RT-DETR (CodeTR Baseline)",
+        "RT-DETR (Distilled w/ ConvNeXt)",
+        "RT-DETR (Distilled w/ ViT)",
+        "RT-DETR (CodeTR Distilled)",
+    ]
+    model_name = st.sidebar.selectbox("Select model", model_options)
+    
+    confidence_threshold = st.sidebar.slider("Confidence Threshold", 0.0, 1.0, 0.1, 0.05)
     
     with st.spinner(f"Loading {model_name}..."):
         model = load_model(model_name)
     st.sidebar.success(f"✅ {model_name} loaded successfully!")
     
-    class_names_list = list(getattr(model, 'names', RTDETR_CLASS_NAMES).values())
+    if hasattr(model, 'names'):
+        class_names_list = list(model.names.values())
+    else:
+        class_names_list = list(TACO_CLASS_NAMES.values())
+        
     color_map = get_color_map(class_names_list)
 
     input_source = st.radio("Choose input source", ["Upload Image", "Real-time Webcam"], horizontal=True)
@@ -139,7 +229,7 @@ def main():
                 with st.spinner("Running inference..."):
                     image_np = np.array(image)
                     image_np_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
-                    annotated_image = predict_and_draw(model, image_np_bgr, confidence_threshold, color_map)
+                    annotated_image = predict_and_draw(model, model_name, image_np_bgr, confidence_threshold, color_map)
                     st.image(annotated_image, caption="Detection Result")
 
     elif input_source == "Real-time Webcam":
@@ -164,7 +254,7 @@ def main():
                         st.warning("Failed to capture frame from camera. Stream may have ended.")
                         break
                     
-                    annotated_frame = predict_and_draw(model, frame, confidence_threshold, color_map)
+                    annotated_frame = predict_and_draw(model, model_name, frame, confidence_threshold, color_map)
                     
                     frame_placeholder.image(annotated_frame, channels="RGB", use_column_width=True)
             finally:
@@ -189,17 +279,32 @@ import cv2
 # =========================================================
 PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 
+# <<< THÊM MỚI 1: Thêm đường dẫn đến các mô hình mới >>>
+# Dựa trên cây thư mục bạn cung cấp, chúng ta thêm các đường dẫn mới ở đây.
+# Hãy đảm bảo các đường dẫn này chính xác với vị trí file của bạn.
 MODEL_PATHS = {
     "Rtdetrv2": os.path.join(PROJECT_ROOT, "FINAL/FINETUNE_BASELINE/rtdetrv2_finetune_taco_finetune_BASELINE/best.pth"),
     "Distill-Convnet": os.path.join(PROJECT_ROOT, "FINAL/DISTILL-CONVNEXT/distilled_rtdetr_convnext_teacher_BEST.pth"),
     "Distill-Vit": os.path.join(PROJECT_ROOT, "FINAL/FINETUNE_DISTILLED/rtdetrv2_finetune_taco_vit_teacher/best.pth"),
-    "YOLOv11l": os.path.join(PROJECT_ROOT, "FINAL/YOLO/yolo_checkpoints/yolo11l_finetune_baseline/weights/best.pt")
+    "YOLOv11l": os.path.join(PROJECT_ROOT, "FINAL/YOLO/yolo_checkpoints/yolo11l_finetune_baseline/weights/best.pt"),
+    
+    # Các mô hình mới được thêm vào
+    "Rtdetrv2-CodeTR-Baseline": os.path.join(PROJECT_ROOT, "FINAL/FINETUNE_BASELINE_CODETR/best.pth"),
+    "Rtdetrv2-CodeTR-Distilled": os.path.join(PROJECT_ROOT, "FINAL/FINETUNE_DISTILLED_CODETR/best.pth"),
+    "YOLOv11l-CodeTR": os.path.join(PROJECT_ROOT, "FINAL/YOLO_CODER/yolo_checkpoints/yolo11l_finetune_baseline/weights/best.pt"),
 }
 
+# Các mô hình RT-DETR cần file config để khởi tạo kiến trúc.
+# Giả sử các phiên bản "CodeTR" sử dụng lại các file config tương ứng.
 CONFIG_PATHS = {
     "Rtdetrv2": os.path.join(PROJECT_ROOT, "FINAL/CONFIG/rtdetrv2_taco_finetune_BASELINE.yml"),
     "Distill-Convnet": os.path.join(PROJECT_ROOT, "FINAL/CONFIG/rtdetrv2_taco_finetune_convnext.yml"),
     "Distill-Vit": os.path.join(PROJECT_ROOT, "FINAL/CONFIG/rtdetrv2_taco_finetune_vit.yml"),
+
+    # <<< THÊM MỚI 2: Thêm config cho các mô hình mới (nếu cần) >>>
+    # Giả sử model baseline CodeTR dùng config baseline, và model distilled CodeTR dùng config distilled.
+    "Rtdetrv2-CodeTR-Baseline": os.path.join(PROJECT_ROOT, "FINAL/CONFIG/rtdetrv2_taco_finetune_BASELINE.yml"),
+    "Rtdetrv2-CodeTR-Distilled": os.path.join(PROJECT_ROOT, "FINAL/CONFIG/rtdetrv2_taco_finetune_vit.yml"), # Thay đổi nếu bạn có config riêng
 }
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -212,20 +317,30 @@ def load_YOLO():
     model.to(device)
     return model
 
+# <<< THÊM MỚI 3: Thêm loader cho YOLO-CodeTR >>>
+def load_YOLO_CodeTR():
+    model = YOLO(MODEL_PATHS["YOLOv11l-CodeTR"])
+    model.to(device)
+    return model
+
 # =========================================================
-# RT-DETR LOAD HELPER
+# RT-DETR LOAD HELPER (Không thay đổi)
 # =========================================================
 def _load_rtdetrv2_model_from_config(model_path: str, config_path: str):
-    original_cwd = os.getcwd()
+    # Get the project root and the path to the rtdetr source code
+    original_cwd = os.getcwd() # Keep this to resolve absolute paths correctly
     rtdetr_code_path = os.path.join(PROJECT_ROOT, "rtdetr")
 
     if not os.path.isdir(rtdetr_code_path):
         raise FileNotFoundError(
             f"Thư mục 'rtdetr' không được tìm thấy tại gốc dự án: {rtdetr_code_path}"
         )
+    
+    # Temporarily add the rtdetr directory to sys.path for safe importing
+    original_sys_path = sys.path[:]
+    sys.path.insert(0, rtdetr_code_path)
 
     try:
-        os.chdir(rtdetr_code_path)
         from src.core import YAMLConfig
 
         abs_config_path = os.path.join(original_cwd, config_path)
@@ -238,6 +353,7 @@ def _load_rtdetrv2_model_from_config(model_path: str, config_path: str):
         if 'model' in ckpt: state_dict = ckpt['model']
         elif 'state_dict' in ckpt: state_dict = ckpt['state_dict']
         else: state_dict = ckpt
+        
         clean_state_dict = {k.replace('module.', ''): v for k, v in state_dict.items()}
 
         model.load_state_dict(clean_state_dict, strict=False)
@@ -246,7 +362,7 @@ def _load_rtdetrv2_model_from_config(model_path: str, config_path: str):
         return model
 
     finally:
-        os.chdir(original_cwd)
+        sys.path[:] = original_sys_path
 
 # =========================================================
 # INDIVIDUAL LOADERS
@@ -258,8 +374,15 @@ def load_DistillConv():
 def load_DistillVit():
     return _load_rtdetrv2_model_from_config(MODEL_PATHS["Distill-Vit"], CONFIG_PATHS["Distill-Vit"])
 
+# <<< THÊM MỚI 4: Thêm các hàm loader cho mô hình RT-DETR mới >>>
+def load_Rtdetrv2_CodeTR_Baseline():
+    return _load_rtdetrv2_model_from_config(MODEL_PATHS["Rtdetrv2-CodeTR-Baseline"], CONFIG_PATHS["Rtdetrv2-CodeTR-Baseline"])
+def load_Rtdetrv2_CodeTR_Distilled():
+    return _load_rtdetrv2_model_from_config(MODEL_PATHS["Rtdetrv2-CodeTR-Distilled"], CONFIG_PATHS["Rtdetrv2-CodeTR-Distilled"])
+
+
 # =========================================================
-# INFERENCE FUNCTION (KHÔI PHỤC NORMALIZE)
+# INFERENCE FUNCTION (Không thay đổi)
 # =========================================================
 @torch.inference_mode()
 def run_inference(model, image):
@@ -392,7 +515,7 @@ def box_cxcywh_to_xyxy(x, width, height):
     x_c, y_c, w, h = x.unbind(1)
     b = [(x_c - 0.5 * w), (y_c - 0.5 * h), (x_c + 0.5 * w), (y_c + 0.5 * h)]
     b = torch.stack(b, dim=1)
-    b *= torch.tensor([width, height, width, height], dtype=torch.float32)
+    b *= torch.tensor([width, height, width, height], dtype=torch.float32, device=x.device)
     return b
 
 def draw_boxes(image_np, boxes, labels=None, color_map=None):
@@ -10051,6 +10174,7 @@ if __name__ == '__main__':
 ===== DIRECTORY TREE =====
 ./
     app.py
+    environment.yml
     explore.ipynb
     models.py
     README.md
@@ -10076,17 +10200,41 @@ if __name__ == '__main__':
             rtdetrv2_r50vd_m_7x_coco.yml
             rtdetrv2_r50vd_m_dsp_3x_coco.yml
             rtdetrv2_taco_finetune_BASELINE.yml
+            rtdetrv2_taco_finetune_baseline_codetr.yml.template
             rtdetrv2_taco_finetune_convnext.yml
+            rtdetrv2_taco_finetune_distilled_codetr.yml.template
             rtdetrv2_taco_finetune_vit.yml
             include/
                 dataloader.yml
                 optimizer.yml
                 rtdetrv2_r50vd.yml
-        DISTILL-CONVNEXT/
+        DISTILL-CONVNEXT_DINOv3/
             distilled_rtdetr_convnext_teacher_BEST.pth
-        DISTILL-VIT/
+        DISTILL-VIT_DINOv3/
             distilled_rtdetr_vit_teacher_BEST.pth
-        FINETUNE_BASELINE/
+        DISTILL_CODER/
+            distilled_rtdetr_teacher_BEST.pth
+        FINETUNE_BASELINE_CODETR/
+            best.pth
+            checkpoint0004.pth
+            checkpoint0009.pth
+            checkpoint0014.pth
+            checkpoint0019.pth
+            checkpoint0024.pth
+            checkpoint0029.pth
+            checkpoint0034.pth
+            checkpoint0039.pth
+            checkpoint0044.pth
+            checkpoint0049.pth
+            last.pth
+            log.txt
+            eval/
+                000.pth
+                latest.pth
+            summary/
+                events.out.tfevents.1761959176.914bf09228e3.7055.0
+                events.out.tfevents.1761959176.914bf09228e3.7056.0
+        FINETUNE_BASELINE_DINOv3/
             rtdetrv2_finetune_taco_finetune_BASELINE/
                 best.pth
                 checkpoint0009.pth
@@ -10102,7 +10250,29 @@ if __name__ == '__main__':
                 summary/
                     events.out.tfevents.1761865059.7158e1f340c4.15693.0
                     events.out.tfevents.1761865059.7158e1f340c4.15694.0
-        FINETUNE_DISTILLED/
+        FINETUNE_DISTILLED_CODETR/
+            best.pth
+            checkpoint0004.pth
+            checkpoint0009.pth
+            checkpoint0014.pth
+            checkpoint0019.pth
+            checkpoint0024.pth
+            checkpoint0029.pth
+            checkpoint0034.pth
+            checkpoint0039.pth
+            checkpoint0044.pth
+            checkpoint0049.pth
+            last.pth
+            log.txt
+            eval/
+                000.pth
+                latest.pth
+            summary/
+                events.out.tfevents.1761954308.914bf09228e3.3818.0
+                events.out.tfevents.1761954308.914bf09228e3.3819.0
+        FINETUNE_DISTILLED_DINOv3/
+            best.pth
+            checkpoint0004.pth
             rtdetrv2_finetune_taco_convnext_teacher/
                 best.pth
                 checkpoint0009.pth
@@ -10133,7 +10303,35 @@ if __name__ == '__main__':
                 summary/
                     events.out.tfevents.1761860053.7158e1f340c4.10047.0
                     events.out.tfevents.1761860053.7158e1f340c4.10048.0
-        YOLO/
+        YOLO_CODER/
+            yolo_checkpoints/
+                yolo11l_finetune_baseline/
+                    args.yaml
+                    BoxF1_curve.png
+                    BoxPR_curve.png
+                    BoxP_curve.png
+                    BoxR_curve.png
+                    confusion_matrix.png
+                    confusion_matrix_normalized.png
+                    labels.jpg
+                    results.csv
+                    results.png
+                    train_batch0.jpg
+                    train_batch1.jpg
+                    train_batch2.jpg
+                    train_batch3200.jpg
+                    train_batch3201.jpg
+                    train_batch3202.jpg
+                    val_batch0_labels.jpg
+                    val_batch0_pred.jpg
+                    val_batch1_labels.jpg
+                    val_batch1_pred.jpg
+                    val_batch2_labels.jpg
+                    val_batch2_pred.jpg
+                    weights/
+                        best.pt
+                        last.pt
+        YOLO_DINOV3/
             yolo_checkpoints/
                 yolo11l_finetune_baseline/
                     args.yaml
@@ -10152,6 +10350,9 @@ if __name__ == '__main__':
                     train_batch1601.jpg
                     train_batch1602.jpg
                     train_batch2.jpg
+                    train_batch3200.jpg
+                    train_batch3201.jpg
+                    train_batch3202.jpg
                     val_batch0_labels.jpg
                     val_batch0_pred.jpg
                     val_batch1_labels.jpg

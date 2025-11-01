@@ -109,7 +109,7 @@ def box_cxcywh_to_xyxy(x, width, height):
     x_c, y_c, w, h = x.unbind(1)
     b = [(x_c - 0.5 * w), (y_c - 0.5 * h), (x_c + 0.5 * w), (y_c + 0.5 * h)]
     b = torch.stack(b, dim=1)
-    b *= torch.tensor([width, height, width, height], dtype=torch.float32)
+    b *= torch.tensor([width, height, width, height], dtype=torch.float32, device=x.device)
     return b
 
 def draw_boxes(image_np, boxes, labels=None, color_map=None):
