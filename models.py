@@ -23,7 +23,7 @@ MODEL_NAMES = {
     # Nhóm CodeTR
     "yolo_codetr": "YOLO (CodeTR Baseline)",
     "rtdetr_codetr_baseline": "RT-DETR (CodeTR Baseline)",
-    "rtdetr_codetr_distilled": "RT-DETR (Distill CodeTR)",
+    "rtdetr_codetr_distilled": "🚀RT-DETR (Distill CodeTR)",
 }
 
 MODEL_PATHS = {
@@ -119,6 +119,49 @@ def load_single_model(model_name: str):
             raise ValueError(f"Config path for '{model_name}' not found.")
         return _load_rtdetrv2_model_from_config(path, config_path)
     raise TypeError(f"Unknown model type for '{model_name}'.")
+
+
+# =========================================================
+# LOAD CHOSEN MODEL(load model được chọn)
+# =========================================================
+def load_final_model():
+    """
+    Load the final production model: 🚀RT-DETR (Distill CodeTR)
+
+    Returns:
+        model (torch.nn.Module): Loaded and ready-to-run model
+    Raises:
+        FileNotFoundError, ValueError, RuntimeError
+    """
+    final_model_name = "🚀RT-DETR (Distill CodeTR)"
+
+    print("\n==============================")
+    print("🚀 LOADING FINAL PRODUCTION MODEL")
+    print("==============================")
+
+    model_path = MODEL_PATHS.get(final_model_name)
+    config_path = CONFIG_PATHS.get(final_model_name)
+
+    if not model_path:
+        raise ValueError(f"Model path not defined for '{final_model_name}'")
+    if not os.path.exists(model_path):
+        raise FileNotFoundError(f"Weights file not found at: {model_path}")
+    if not config_path or not os.path.exists(config_path):
+        raise FileNotFoundError(f"Config file not found at: {config_path}")
+
+    print(f"[INFO] Using device: {device}")
+    print(f"[INFO] Model path: {model_path}")
+    print(f"[INFO] Config path: {config_path}")
+
+    try:
+        model = _load_rtdetrv2_model_from_config(model_path, config_path)
+        print(f"[✅] Successfully loaded final model: {final_model_name}")
+        print("==============================\n")
+        return model
+    except Exception as e:
+        print(f"Failed to load final model: {e}")
+        raise RuntimeError(f"Error loading final model: {e}")
+
 
 # =========================================================
 # INFERENCE FUNCTION (Không thay đổi)
