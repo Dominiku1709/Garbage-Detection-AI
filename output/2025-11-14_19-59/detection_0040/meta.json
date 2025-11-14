@@ -1,0 +1,13 @@
+{
+    "class": "Metal",
+    "confidence": 0.4395689070224762,
+    "box_xyxy": [
+        343,
+        505,
+        426,
+        577
+    ],
+    "model_name": "RTDETR",
+    "detection_type": "realtime",
+    "timestamp": "2025-11-14 19:59:51"
+}

@@ -1,0 +1,13 @@
+{
+    "class": "Trash",
+    "confidence": 0.39824360609054565,
+    "box_xyxy": [
+        1237,
+        368,
+        1279,
+        414
+    ],
+    "model_name": "RTDETR",
+    "detection_type": "realtime",
+    "timestamp": "2025-11-14 19:59:36"
+}

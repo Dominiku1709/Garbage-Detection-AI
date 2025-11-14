@@ -1,0 +1,12 @@
+{
+    "class": "Plastic",
+    "confidence": 0.4665890336036682,
+    "box_xyxy": [
+        260,
+        253,
+        299,
+        272
+    ],
+    "timestamp": "2025-11-14 18:52:25",
+    "model_name": "YOLO"
+}

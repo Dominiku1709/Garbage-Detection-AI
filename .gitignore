@@ -1,2 +1,38 @@
-/FINAL
-/utils
+# ========================
+# Folders to ignore completely
+# ========================
+/FINAL/
+# Output sessions (auto-generated)
+ /output/
+# Streamlit temp folder (if any)
+ /streamlit/
+
+# ========================
+# Specific files to ignore
+# ========================
+/model.py
+/requirements_dev.txt
+/explore.ipynb
+
+# ========================
+# Utils folder: ignore all except selected files
+# ========================
+/utils/*
+!utils/utils.py
+!utils/output_saver.py
+!utils/draw.py
+!utils/class_remap.py
+
+# ========================
+# Optional: Python cache
+# ========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# ========================
+# Optional: Virtual environments
+# ========================
+venv/
+.env
