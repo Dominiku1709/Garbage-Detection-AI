@@ -41,6 +41,11 @@ project_root/
 │ ├── class_remap.py # Fine → 6 class remapping
 │ ├── utils.py # Helper functions
 │
+|
+|
+├── RT_CO_DETR.pdf # related paper for models and methods
+|
+|
 └── output/ # Auto-generated detection sessions
 ```
 
@@ -61,5 +66,6 @@ pip install -r requirements.txt
 ```
 streamlit run main.py
 ```
+
 
 ### 
