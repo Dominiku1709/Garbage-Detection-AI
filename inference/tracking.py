@@ -7,6 +7,7 @@ import numpy as np
 
 from inference.detector import run_inference
 from utils.output_saver import save_detection
+#from utils.draw import draw_summary
 
 
 # Centroid Tracker
