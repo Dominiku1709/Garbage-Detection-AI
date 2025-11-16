@@ -1,0 +1,13 @@
+{
+    "class": "Paper",
+    "confidence": 0.3054625988006592,
+    "box_xyxy": [
+        353,
+        374,
+        401,
+        413
+    ],
+    "model_name": "RTDETR",
+    "detection_type": "realtime",
+    "timestamp": "2025-11-17 00:07:40"
+}

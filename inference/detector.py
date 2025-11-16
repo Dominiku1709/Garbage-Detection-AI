@@ -37,9 +37,9 @@ def run_inference(model, image, conf_threshold=0.25, color_map=None):
 
     boxes_to_draw, labels_to_draw, detections = [], [], []
 
-    
+    # ===============================
     # YOLO MODE (Ultralytics)
-    
+    # ===============================
     if hasattr(model, "predict"):
         results = model.predict(image_pil, device=device, verbose=False)[0]
 
@@ -71,9 +71,10 @@ def run_inference(model, image, conf_threshold=0.25, color_map=None):
                 )
                 LAST_SAVE_TIME = time.time()
 
-    
+    # ===============================
     # RT-DETR MODE (torch)
-    
+    # ===============================
+    elif hasattr(model, "forward"):
         transform = transforms.Compose([
             transforms.Resize((640, 640)),
             transforms.ToTensor(),

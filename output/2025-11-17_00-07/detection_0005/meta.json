@@ -1,0 +1,13 @@
+{
+    "class": "Plastic",
+    "confidence": 0.4851764738559723,
+    "box_xyxy": [
+        638,
+        552,
+        699,
+        607
+    ],
+    "model_name": "RTDETR",
+    "detection_type": "realtime",
+    "timestamp": "2025-11-17 00:07:31"
+}
