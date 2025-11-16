@@ -1,28 +1,18 @@
-    # =========================================================
-# app/run_realtime_app.py
-# =========================================================
 import streamlit as st
 import torch
 import os
 import sys
 
-# --- ⚙️ Add project root to sys.path ---
-# This allows us to import from models/, inference/, and utils/
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
-# -------------------------------------
 
-# =========================================================
 # IMPORT UTILITIES AND MODELS
-# =========================================================
 from utils.class_remap import get_color_map
 from models.loader import MODEL_NAMES, load_single_model
 from inference.tracking import run_realtime_tracking # Use the dedicated tracking script
 
-# =========================================================
 # CONFIGURATION
-# =========================================================
 st.set_page_config(page_title="Real-time Tracking", layout="centered")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -42,9 +32,7 @@ def cached_load_single_model(model_name):
         st.error(f"Failed to load {model_name}: {e}")
         return None
 
-# =========================================================
-# PAGE 2: REAL-TIME LOCAL CAMERA DETECTION
-# =========================================================
+# REAL-TIME LOCAL CAMERA DETECTION PAGE
 def render_realtime_page():
     st.header("🎥 Real-time Local Camera Tracking")
     st.info(
@@ -97,9 +85,7 @@ def render_realtime_page():
             st.error("Cannot start tracking: Model was not loaded.")
 
 
-# =========================================================
 # MAIN
-# =========================================================
 if __name__ == "__main__":
     st.sidebar.title("Real-time App")
     st.sidebar.info(

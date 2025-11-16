@@ -11,9 +11,7 @@ import cv2
 
 #from models.rtdetr_loader import load_rtdetr_model
 
-# ---------------------------------------------------------
 # Device setup
-# ---------------------------------------------------------
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ---------------------------------------------------------
@@ -58,9 +56,7 @@ CONFIG_PATHS = {
     MODEL_NAMES["rtdetr_codetr_distilled"]: os.path.join(PROJECT_ROOT, "FINAL/CONFIG/rtdetrv2_taco_finetune_distilled_codetr.yml"),
 }
 
-# ---------------------------------------------------------
 # Load all models
-# ---------------------------------------------------------
 def load_all_models():
     """Load all models, return dict and errors dict."""
     models, errors = {}, {}
@@ -110,9 +106,7 @@ def load_rtdetr_model(model_path: str, config_path: str):
         sys.path[:] = original_sys_path
 
 
-# ---------------------------------------------------------
 # Load a single model (used for real-time)
-# ---------------------------------------------------------
 def load_single_model(model_name: str):
     """Load one model by display name (for real-time use)."""
     path = MODEL_PATHS.get(model_name)

@@ -1,13 +1,9 @@
-# =========================================================
 # utilss/class_remap.py
-# =========================================================
 
 import random
 import streamlit as st
 
-# =========================================================
-# ✅ ORIGINAL TACO CLASS DEFINITIONS
-# =========================================================
+# ORIGINAL TACO CLASS DEFINITIONS
 TACO_CLASS_NAMES = {
     0: 'Aluminium foil', 1: 'Battery', 2: 'Aluminium blister pack', 3: 'Carded blister pack',
     4: 'Other plastic bottle', 5: 'Clear plastic bottle', 6: 'Glass bottle', 7: 'Plastic bottle cap',
@@ -26,9 +22,7 @@ TACO_CLASS_NAMES = {
     57: 'Styrofoam piece', 58: 'Unlabeled litter', 59: 'Cigarette',
 }
 
-# =========================================================
-# 🔹 STEP 1: Map fine-grained TACO classes → 6 base categories
-# =========================================================
+# STEP 1: Map fine-grained TACO classes → 6 base categories
 TACO_TO_6CLASS = {
     "Paper": [
         "Toilet tube", "Other carton", "Egg carton", "Drink carton", "Corrugated carton",
@@ -64,9 +58,7 @@ for broad, fine_list in TACO_TO_6CLASS.items():
     for fine in fine_list:
         CLASS_REMAP_6[fine] = broad
 
-# =========================================================
-# 🔹 STEP 2: Merge 6 base → 3 final recycle categories
-# =========================================================
+# STEP 2: Merge 6 base → 3 final recycle categories
 RECYCLE_MAP = {
     "Dry recycle": ["Paper", "Glass", "Metal", "Plastic"],
     "Organic": ["Organic"],

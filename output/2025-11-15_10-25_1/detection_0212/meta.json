@@ -1,0 +1,13 @@
+{
+    "class": "Organic",
+    "confidence": 0.2088756412267685,
+    "box_xyxy": [
+        982,
+        570,
+        1061,
+        646
+    ],
+    "model_name": "RTDETR",
+    "detection_type": "realtime",
+    "timestamp": "2025-11-15 10:25:47"
+}

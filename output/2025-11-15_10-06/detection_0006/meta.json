@@ -1,0 +1,13 @@
+{
+    "class": "Glass",
+    "confidence": 0.22089825570583344,
+    "box_xyxy": [
+        1075,
+        632,
+        1279,
+        719
+    ],
+    "model_name": "RTDETR",
+    "detection_type": "image",
+    "timestamp": "2025-11-15 10:25:01"
+}

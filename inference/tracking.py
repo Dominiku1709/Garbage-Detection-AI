@@ -1,23 +1,16 @@
-# =========================================================
 # inference/tracking.py
-# =========================================================
-"""
-Real-time detection + object tracking.
-Saving happens HERE (because real-time requires cooldown).
-"""
+
 
 import cv2
 import time
 import numpy as np
 
 from inference.detector import run_inference
-from utils.draw import draw_summary
 from utils.output_saver import save_detection
 
 
-# =========================================================
-# ⚙️ Simple Centroid Tracker
-# =========================================================
+# Centroid Tracker
+
 class SimpleCentroidTracker:
     def __init__(self, max_distance=50):
         self.next_id = 0
@@ -53,9 +46,8 @@ class SimpleCentroidTracker:
         return results
 
 
-# =========================================================
-# ⚡ Real-time Detection + Tracking
-# =========================================================
+# Real-time Detection + Tracking
+
 def run_realtime_tracking(model, color_map, camera_index=0, conf_threshold=0.3):
     cap = cv2.VideoCapture(camera_index)
     if not cap.isOpened():
@@ -72,9 +64,9 @@ def run_realtime_tracking(model, color_map, camera_index=0, conf_threshold=0.3):
     last_time = time.time()
     total_detections = 0
 
-    # =====================================================
+   
     # Save session folder name (created once)
-    # =====================================================
+    
     from utils.output_saver import create_new_session
     SESSION_FOLDER = create_new_session()
 
@@ -101,9 +93,9 @@ def run_realtime_tracking(model, color_map, camera_index=0, conf_threshold=0.3):
         # Tracker update
         tracked = tracker.update(boxes_xyxy)
 
-        # -----------------------------------------------------
-        # 🔥 REAL-TIME SAVE LOGIC (with 3s cooldown)
-        # -----------------------------------------------------
+       
+        # REAL-TIME SAVE LOGIC (with 3s cooldown)
+     
         now = time.time()
         should_save = (now - LAST_SAVE_TIME >= SAVE_COOLDOWN)
 
@@ -132,9 +124,9 @@ def run_realtime_tracking(model, color_map, camera_index=0, conf_threshold=0.3):
 
             LAST_SAVE_TIME = now  # Reset cooldown
 
-        # -----------------------------------------------------
+     
         # Draw tracks
-        # -----------------------------------------------------
+   
         for tid, box in tracked:
             # Find original detection
             match = None
@@ -166,9 +158,9 @@ def run_realtime_tracking(model, color_map, camera_index=0, conf_threshold=0.3):
         last_time = time.time()
         total_detections += len(detections)
 
-        draw_summary(annotated_frame, 0, 0, total_detections)
-        cv2.putText(annotated_frame, f"FPS: {fps:.2f}", (20, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
+        # draw_summary(annotated_frame, 0, 0, total_detections)
+        # cv2.putText(annotated_frame, f"FPS: {fps:.2f}", (20, 40),
+        #             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
         cv2.imshow("♻️ Real-time Detection + Tracking", annotated_frame)
         if cv2.waitKey(1) & 0xFF in [27, ord("q")]:

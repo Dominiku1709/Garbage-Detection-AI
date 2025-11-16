@@ -1,6 +1,4 @@
-# =========================================================
 # utils/output_saver.py
-# =========================================================
 """
 Session-based saving structure using timestamp folders.
 
@@ -20,9 +18,7 @@ OUTPUT_ROOT = os.path.join(PROJECT_ROOT, "output")
 
 os.makedirs(OUTPUT_ROOT, exist_ok=True)
 
-# =========================================================
 # Create session folder using timestamp
-# =========================================================
 def create_new_session():
     """
     Creates: output/YYYY-MM-DD_HH-MM/
@@ -46,9 +42,7 @@ def create_new_session():
     return session_folder
 
 
-# =========================================================
 # Save one detection inside a session folder
-# =========================================================
 def save_detection(session_folder, frame_bgr, cls_name, confidence, box_xyxy,
                    model_name="unknown", detection_type="realtime"):
     """

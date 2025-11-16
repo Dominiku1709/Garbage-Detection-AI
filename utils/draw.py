@@ -1,6 +1,5 @@
-# =========================================================
 # utils/draw.py
-# =========================================================
+
 import cv2
 import numpy as np
 
@@ -83,7 +82,7 @@ def draw_summary(frame: np.ndarray, arg1, arg2, total_detections: int):
     handles separately.
     """
     # This text is drawn at (20, 70)
-    text = f"Total Detections: {total_detections}"
+    #text = f"Total Detections: {total_detections}"
     
     # This position is chosen to be just below the FPS text
     # which inference/tracking.py draws at (20, 40).
@@ -94,4 +93,4 @@ def draw_summary(frame: np.ndarray, arg1, arg2, total_detections: int):
     thickness = 2
     font_scale = 0.7
     
-    cv2.putText(frame, text, pos, FONT, font_scale, color, thickness)
+    cv2.putText(frame, pos, FONT, font_scale, color, thickness)

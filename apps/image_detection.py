@@ -1,6 +1,6 @@
-# =========================================================
+
 # app/run_image_app.py
-# =========================================================
+
 import streamlit as st
 import torch
 from PIL import Image
@@ -10,23 +10,23 @@ import time
 import os
 import sys
 
-# --- ⚙️ Add project root to sys.path ---
-# This allows us to import from models/, inference/, and utils/
+
+
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
-# -------------------------------------
 
-# =========================================================
+
+
 # IMPORT UTILITIES AND MODELS
-# =========================================================
+
 from utils.class_remap import get_color_map
 from models.loader import MODEL_NAMES,load_all_models
 from inference.detector import run_inference
 
-# =========================================================
+
 # CONFIGURATION
-# =========================================================
+
 st.set_page_config(page_title="Image Detection & Comparison", layout="wide")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -45,9 +45,8 @@ def cached_load_all_models():
 
 
 
-# =========================================================
 # PAGE 1: IMAGE UPLOAD & MODEL COMPARISON
-# =========================================================
+
 def render_upload_page():
     st.header("📸 Image Upload & Model Comparison")
     st.info("Upload an image to run it through all 7 detection models.")
@@ -59,7 +58,7 @@ def render_upload_page():
         st.subheader("Original Image")
         st.image(image, use_container_width=True)
 
-        # 🔹 Unified threshold control
+        # Unified threshold control
         st.sidebar.header("⚙️ Configuration")
         global_conf_thresh = st.sidebar.slider(
             "Confidence Threshold (applies to all models)",
@@ -94,7 +93,7 @@ def render_upload_page():
                         # preprocessing, inference, remapping, and drawing.
                         annotated_image, detections = run_inference(
                             model,
-                            image_np_bgr, # Pass the BGR numpy image
+                            image_np_bgr, 
                             global_conf_thresh,
                             color_map
                         )
@@ -110,9 +109,7 @@ def render_upload_page():
 
                 col_idx = (col_idx + 1) % num_cols
 
-# =========================================================
 # MAIN
-# =========================================================
 if __name__ == "__main__":
     st.sidebar.title("Image Detection App")
     st.sidebar.info(

@@ -1,4 +1,4 @@
-# ===== .\utils.py =====
+# utils\utils.py 
 import os
 import cv2
 import torch
@@ -9,17 +9,14 @@ from datetime import datetime
 import random
 
 
-# ========================================
-# 🔹 DEVICE SETUP
-# ========================================
+# DEVICE SETUP
+
 def get_device():
     """Return available device."""
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-# ========================================
-# 🔹 IMAGE PREPROCESSING
-# ========================================
+#  IMAGE PREPROCESSING
 def preprocess_image(image, size=(640, 640)):
     """
     Prepare image for model inference.
@@ -39,9 +36,7 @@ def preprocess_image(image, size=(640, 640)):
     return transform(img).unsqueeze(0)
 
 
-# ========================================
-# 🔹 CAMERA HANDLING (OpenCV)
-# ========================================
+# CAMERA HANDLING (OpenCV)
 def open_camera(source=0, width=1800, height=1000):
     """
     Initialize webcam or video source.
@@ -70,9 +65,7 @@ def release_camera(cap):
     cv2.destroyAllWindows()
 
 
-# ========================================
-# 🔹 SAVE OUTPUTS
-# ========================================
+#  SAVE OUTPUTS
 def save_result(image, result_dict, output_dir="output"):
     """
     Save image and inference metadata to timestamped folder.
@@ -101,9 +94,7 @@ def save_result(image, result_dict, output_dir="output"):
     print(f"✅ Result saved at: {save_folder}")
     return save_folder
 
-# ========================================
-# 🔹 VISUALIZATION
-# ========================================
+# VISUALIZATION
 def box_cxcywh_to_xyxy(x, width, height):
     """Convert boxes from [cx, cy, w, h] to [x1, y1, x2, y2] format."""
     x_c, y_c, w, h = x.unbind(1)
