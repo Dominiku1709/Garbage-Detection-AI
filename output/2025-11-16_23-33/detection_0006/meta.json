@@ -1,0 +1,13 @@
+{
+    "class": "Glass",
+    "confidence": 0.8199676871299744,
+    "box_xyxy": [
+        664,
+        167,
+        765,
+        388
+    ],
+    "model_name": "RTDETR",
+    "detection_type": "realtime",
+    "timestamp": "2025-11-16 23:33:31"
+}

@@ -1,0 +1,13 @@
+{
+    "class": "Unknown",
+    "confidence": 0.4676266312599182,
+    "box_xyxy": [
+        96,
+        117,
+        174,
+        182
+    ],
+    "model_name": "RTDETR",
+    "detection_type": "realtime",
+    "timestamp": "2025-11-16 23:31:20"
+}
