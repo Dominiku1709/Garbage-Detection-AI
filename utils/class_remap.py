@@ -1,7 +1,7 @@
 # utilss/class_remap.py
 
 import random
-import streamlit as st
+from functools import lru_cache
 
 # ORIGINAL TACO CLASS DEFINITIONS
 TACO_CLASS_NAMES = {
@@ -73,12 +73,12 @@ for recycle_class, base_classes in RECYCLE_MAP.items():
                 CLASS_REMAP_3[fine] = recycle_class
 
 
-@st.cache_data
+@lru_cache(maxsize=1)
 def get_color_map(_=None):
     six_classes = ["Paper", "Glass", "Metal", "Plastic", "Organic", "Trash"]
     return {name: [random.randint(0, 255) for _ in range(3)] for name in six_classes}
 
-@st.cache_data
+@lru_cache(maxsize=1)
 def get_color_recycle_map(_=None):
     recycle_classes = ["Dry recycle", "Organic", "Trash"]
     return {name: [random.randint(0, 255) for _ in range(3)] for name in recycle_classes}

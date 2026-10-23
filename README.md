@@ -1,71 +1,37 @@
-# Garbage Detection AI  
-### Group 4 – Tháp tư 119
+# Garbage Detection AI
 
-## 🧭 Introduction
-Garbage Detection AI is a deep-learning project designed to automatically detect and classify waste using computer-vision models such as **YOLO** and **RT-DETR**.  
-The system supports:
+A local Streamlit dashboard for waste classification, detection history, and recycling guidance. The project includes YOLO/RT-DETR research code and this dashboard uses a configured local YOLO checkpoint when available. No paid APIs are used.
 
-- Real-time webcam detection  
-- Image-based detection  
-- Object tracking  
-- Automatic saving of detection results (cropped images + metadata)  
+## Run the dashboard
 
-This project aims to help automate waste sorting and improve environmental management using AI.
+Use Python 3.10 or 3.11 in a virtual environment:
 
----
-
-## 📁 Project Structure
-
-
-Project structure
-```
-project_root/
-│
-├── main.py # Streamlit entry point
-│
-├── app/
-│ ├── run_image_app.py # Image detection interface
-│ ├── run_realtime_app.py # Webcam detection & tracking
-│
-├── inference/
-│ ├── detector.py # Unified YOLO + RT-DETR inference
-│ ├── tracking.py # Real-time tracking system
-│
-├── models/
-│ ├── loader.py # Load all models
-│ ├── rtdetr_loader.py # RT-DETR config loader
-│
-├── utils/
-│ ├── output_saver.py # Save crops + metadata
-│ ├── draw.py # Box drawing utilities
-│ ├── class_remap.py # Fine → 6 class remapping
-│ ├── utils.py # Helper functions
-│
-|
-|
-├── RT_CO_DETR.pdf # related paper for models and methods
-|
-|
-└── output/ # Auto-generated detection sessions
-```
-
----
-
-### **Notice**
-
-Create an output folder at project root named "output" before inference run. (If there's none)
-
-
-## ▶️ How to Run Inference
-
-### **1. Install Dependencies**
-```bash
-pip install -r requirements.txt
-```
-### **2. Run the app**
-```
+```powershell
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
 streamlit run main.py
 ```
 
+The app is responsive and offers an overview dashboard, image analysis, persistent history, a recycling guide, and the existing live-camera workflow. Uploaded images are analyzed in memory and are not saved; filenames, results, model labels, and timestamps are stored in `output/waste_history.sqlite3`.
 
-### 
+## Configure an AI checkpoint
+
+The repository does not include trained weights: the project's `FINAL` model directory is intentionally excluded from version control. Set `GARBAGE_MODEL_PATH` to a local Ultralytics-compatible YOLO checkpoint trained for waste classes. In PowerShell:
+
+```powershell
+$env:GARBAGE_MODEL_PATH = "C:\models\waste-best.pt"
+streamlit run main.py
+```
+
+The app also checks the two YOLO checkpoint locations used by the existing project under `FINAL/YOLO_DINOV3` and `FINAL/YOLO_CODER`. If a checkpoint is configured but cannot be loaded, the app displays the error rather than silently switching classifiers. Detection labels are mapped into plastic, paper, metal, glass, organic waste, and other waste. Model confidence is shown for each detection.
+
+Without a local checkpoint, the app remains usable in **manual-review fallback** mode: upload an image, choose its category after reviewing it, and get the corresponding sorting recommendation. This mode is explicitly not AI detection and does not invent a confidence score. To obtain model predictions, provide a locally trained checkpoint; no external API or model download is required.
+
+## History and data
+
+The dashboard stores image filenames, category counts, confidence values, model name, and local timestamp in SQLite under `output/`. It does not retain uploaded image bytes. Removing `output/waste_history.sqlite3` clears the dashboard history.
+
+## Existing model research code
+
+The `rtdetr/`, `models/`, and `inference/` directories contain the project's existing RT-DETR and YOLO training/inference components. RT-DETR checkpoints and generated configs are not bundled; see `rtdetr/README.md` and `rtdetr/configs/rtdetrv2/rtdetrv2_taco_finetune_BASELINE.yml.template` for the model training setup.
